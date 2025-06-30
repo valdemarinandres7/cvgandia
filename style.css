@@ -1,12 +1,24 @@
 body { background: #23263a; color: #ffda47; font-family: 'Segoe UI', Arial, sans-serif; margin:0;}
-#app { max-width:1100px; margin:0 auto; padding-bottom:40px;}
+#app { max-width:1350px; margin:0 auto; padding-bottom:40px;}
 .titulo { text-align:center; color:#ffda47; font-size:2.1em; margin:1.2em 0 0.7em 0; font-weight:900; }
 
+.btn-edit {
+  background: #ffd600;
+  color: #23263a;
+  border: none;
+  border-radius: 8px;
+  padding: 0.3em 1.2em;
+  font-size: 1em;
+  cursor: pointer;
+  margin-bottom: 1em;
+  font-weight:600;
+  margin-left: 1em;
+}
 .cancha-wrap { display: flex; flex-direction: column; align-items: center; margin:2em 0;}
-.cancha-svg { width: 660px; height: 420px; display: block; background: #0e1120; border-radius: 24px; box-shadow:0 8px 40px #0007;
-  border: 6px solid #ffda47; margin-bottom: 1.5em; position: relative;}
+.cancha-svg { width: 900px; height: 480px; display: block; background: #0e1120; border-radius: 24px; box-shadow:0 8px 40px #0008;
+  border: 7px solid #ffda47; margin-bottom: 1.5em; position: relative;}
 .jugador-campo {
-  position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 4px solid #fff;
+  position: absolute; width: 64px; height: 64px; border-radius: 50%; border: 4px solid #fff;
   font-size: 1.1em; font-weight: 700; color: #fff; background: linear-gradient(145deg, #0ea5e9 60%, #23263a 100%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   cursor: pointer; user-select: none; z-index: 12; transition: box-shadow .13s, border .13s, background .13s; outline:none;
@@ -21,11 +33,19 @@ body { background: #23263a; color: #ffda47; font-family: 'Segoe UI', Arial, sans
 .puntos-bar {
   text-align:center; font-size:1.5em; font-weight:bold; margin:1.5em 0 0.5em 0;
 }
-.panel { display:flex; gap:20px; justify-content:center; margin:1.6em 0 1.8em 0; flex-wrap:wrap;}
-.panel select, .panel button {
-  font-size:1.1em; padding:0.6em 1.5em; border-radius:8px; border:none; background:#23263a; color:#ffda47; margin-right:1em;
+.panel { display:flex; gap:20px; justify-content:center; margin:1.7em 0 2em 0; flex-wrap:wrap;}
+.panel button {
+  font-size:1.1em; padding:0.7em 1.5em; border-radius:8px; border:none; background:#23263a; color:#ffda47; margin-right:1em;
+  font-weight:600; transition:background .15s,color .15s;
 }
-.panel button.selected, .panel select:focus { background:#ffda47; color:#23263a;}
+.panel button.selected, .panel button:active { background:#ffda47; color:#23263a;}
+.subzona { font-size:0.95em; font-weight:600; fill:#294a77; pointer-events: none;}
+.zona-btn, .subzona-btn {
+  cursor:pointer; fill:#ffd600; fill-opacity:0.0; transition: fill-opacity .16s;
+  stroke:#0ea5e9; stroke-width:2.5;
+}
+.zona-btn.selected, .subzona-btn.selected { fill:#ffda47; fill-opacity:0.45; stroke:#0ea5e9; }
+.zona-label { font-size:1.35em; font-weight:900; fill:#1976d2; pointer-events:none;}
 .registro-acciones {
   max-width:100%; margin:2.2em auto 0 auto; background:#23263a; border-radius:13px; box-shadow:0 1px 12px #355c9b22; padding:1.2em 1.6em 1.6em 1.6em; font-size:1.07em; color:#ffda47;
 }
@@ -33,3 +53,10 @@ body { background: #23263a; color: #ffda47; font-family: 'Segoe UI', Arial, sans
 .registro-acciones th, .registro-acciones td {border-bottom:1.5px solid #383c4e; padding:0.4em 0.5em; text-align:center;}
 .registro-acciones th { background:#22263a; color: #ffda47;}
 .registro-acciones button {background:#e57373; color:#fff; border:none; border-radius:5px; padding:0.2em 0.5em; cursor:pointer;}
+#popup {position:fixed;left:0;top:0;width:100vw;height:100vh;background:#0009;z-index:200;display:flex;align-items:center;justify-content:center;}
+.popup-box {
+  background:#23263a;border-radius:13px;padding:2em 2.5em;box-shadow:0 6px 44px #355c9b55;display:flex;flex-direction:column;align-items:center;
+  min-width: 320px; color: #ffda47;
+}
+.popup-box label { font-weight:bold; margin-top:1em; }
+.popup-box input { font-size:1.05em; padding:0.3em 0.6em; margin-bottom:0.6em;}
