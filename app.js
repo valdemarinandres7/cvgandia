@@ -1,4 +1,14 @@
-let enPista = [
+// === Datos del partido ===
+let partido = {
+  nombre: "",
+  fecha: "",
+  lugar: "",
+  equipoLocal: "Local",
+  equipoVisita: "Visita"
+};
+
+// === Planteles ===
+let plantelLocal = [
   { nombre: "Juan", dorsal: 1, rol: "C" },
   { nombre: "Pedro", dorsal: 2, rol: "R" },
   { nombre: "Luis", dorsal: 3, rol: "Z" },
@@ -6,7 +16,7 @@ let enPista = [
   { nombre: "Mateo", dorsal: 5, rol: "R" },
   { nombre: "Fede", dorsal: 7, rol: "L" }
 ];
-let enPistaRival = [
+let plantelVisita = [
   { nombre: "Ale", dorsal: 11, rol: "C" },
   { nombre: "Maxi", dorsal: 12, rol: "R" },
   { nombre: "Leo", dorsal: 13, rol: "Z" },
@@ -14,67 +24,58 @@ let enPistaRival = [
   { nombre: "Tobias", dorsal: 15, rol: "R" },
   { nombre: "Bruno", dorsal: 17, rol: "L" }
 ];
+
+// === En cancha ===
+let enPista = [...plantelLocal];
 let marcador = { local: 0, rival: 0 };
 let registro = [];
 
-const posCoords = [
-  {x:150, y:210},{x:300, y:210},{x:450, y:210},{x:600, y:210},{x:750, y:210},{x:890, y:210}
-];
-const posCoordsRival = [
-  {x:150, y:70},{x:300, y:70},{x:450, y:70},{x:600, y:70},{x:750, y:70},{x:890, y:70}
-];
-
 let accionSel = null;
+let jugadorSel = null;
+let zonaOrigen = null;
+let zonaDestino = null;
 
 function render() {
+  if (!partido.nombre || !partido.fecha) {
+    renderDatosPartido();
+    return;
+  }
+  // Panel principal
   document.getElementById('app').innerHTML = `
-    <div class="titulo">ClickVoley</div>
+    <div class="titulo">${partido.nombre || "ClickVoley"}</div>
+    <div style="text-align:center; margin-bottom: 0.6em; font-size:1.1em;">
+      <b>${partido.equipoLocal}</b> vs <b>${partido.equipoVisita}</b> | Fecha: ${partido.fecha} | Lugar: ${partido.lugar}
+      <button style="margin-left:2em" onclick="editarDatosPartido()">Editar datos</button>
+    </div>
     <div class="acciones-panel">
+      <select id="jugSelect">${enPista.map((j,i)=>`<option value="${i}"${jugadorSel===i?' selected':''}>${j.dorsal} - ${j.nombre}</option>`).join('')}</select>
       ${["Saque","Recepción","Ataque","Bloqueo","Defensa","Contraataque","Error"].map(a=>
         `<button onclick="setAccion('${a}')" class="${accionSel===a?'selected':''}">${a}</button>`
       ).join('')}
     </div>
+    <div style="text-align:center;margin-bottom:1em;">1. Selecciona jugador | 2. Acción | 3. Zona de origen propia | 4. Zona destino rival</div>
     <div class="pista-lateral" id="pista">
-      <svg class="pista-svg" width="950" height="285" viewBox="0 0 950 285">
-        <rect x="60" y="30" width="830" height="225" rx="20" fill="#fafdff" stroke="#1976d2" stroke-width="8"/>
-        <line x1="60" y1="142.5" x2="890" y2="142.5" stroke="#ffd600" stroke-width="4"/>
-        <rect x="60" y="142.5" width="830" height="45" fill="#a7b8d9" fill-opacity="0.18"/>
-        <rect x="60" y="97.5" width="830" height="45" fill="#f87171" fill-opacity="0.10"/>
-        <rect x="60" y="30" width="830" height="225" rx="20" fill="none" stroke="#355c9b" stroke-width="3"/>
-        ${registro.map(r=>`
-          <circle cx="${r.x}" cy="${r.y}" r="11" fill="${r.resultado==='Punto'?'#43ea53':r.resultado==='Error'?'#e57373':r.resultado==='Doble positiva'?'#1976d2':r.resultado==='Doble negativa'?'#b91c1c':'#ffd600'}" opacity="0.7"/>
-        `).join('')}
-      </svg>
-      ${enPista.map((j,i)=>`
-        <div class="jugador-campo"
-          style="left:${posCoords[i].x-27}px;top:${posCoords[i].y-27}px;"
-        >${j.dorsal}<span style="font-size:0.91em;line-height:1">${j.rol}</span></div>
-      `).join('')}
-      ${enPistaRival.map((j,i)=>`
-        <div class="jugador-campo rival"
-          style="left:${posCoordsRival[i].x-27}px;top:${posCoordsRival[i].y-27}px;"
-        >${j.dorsal}<span style="font-size:0.91em;line-height:1">${j.rol}</span></div>
-      `).join('')}
+      ${renderPistaVoley(zonaOrigen, zonaDestino)}
     </div>
     <div class="marcador">
-      <span class="local">Local</span> ${marcador.local} - ${marcador.rival} <span class="rival">Rival</span>
+      <span class="local">${partido.equipoLocal}</span> ${marcador.local} - ${marcador.rival} <span class="rival">${partido.equipoVisita}</span>
     </div>
     ${renderStats()}
     <div class="registro-acciones">
       <b style="font-size:1.14em;">Registro de Acciones</b>
       <table>
         <tr>
-          <th>#</th><th>Set</th><th>Acción</th><th>Realizador</th><th>Rival</th><th>Resultado</th><th>Sector</th><th>Borrar</th>
+          <th>#</th><th>Set</th><th>Acción</th><th>Jugador</th><th>Origen</th><th>Destino</th><th>Resultado</th><th>Borrar</th>
         </tr>
         ${registro.map((r,i)=>`
           <tr>
             <td>${i+1}</td>
             <td>${r.set||1}</td>
             <td>${r.accion}</td>
-            <td>${r.jugador? r.jugador.dorsal+" "+r.jugador.rol : "-"}</td>
-            <td>${r.rival? r.rival.dorsal+" "+r.rival.rol : "-"}</td>
-            <td>${r.resultado}</td>
-            <td>(${Math.round(r.x)},${Math.round(r.y)})</td>
+            <td>${r.jugador? r.jugador.dorsal+" "+r.jugador.nombre : "-"}</td>
+            <td>${r.zonaOrigen||"-"}</td>
+            <td>${r.zonaDestino||"-"}</td>
+            <td>${r.resultado||"-"}</td>
             <td><button onclick="borrarAccion(${i})">✗</button></td>
           </tr>
         `).join('')}
@@ -83,44 +84,119 @@ function render() {
       <button class="export-btn" onclick="exportarPDF()">Exportar PDF</button>
     </div>
   `;
-  let pista = document.getElementById('pista');
-  pista.onclick = function(ev) {
-    if(!accionSel) return;
-    let rect = pista.getBoundingClientRect();
-    let x = ev.clientX - rect.left;
-    let y = ev.clientY - rect.top;
-    showPopup(x,y);
+  document.getElementById('jugSelect').onchange = (e) => {
+    jugadorSel = parseInt(e.target.value);
+    render();
   };
 }
 
-window.setAccion = function(a) {
-  accionSel = a;
+// ==================== DATOS PARTIDO ====================
+function renderDatosPartido() {
+  document.getElementById('app').innerHTML = `
+    <div class="titulo">Datos del Partido - ClickVoley</div>
+    <form id="formPartido" style="max-width:420px;margin:2em auto;font-size:1.12em;">
+      <label>Nombre del partido: <input required name="nombre" style="width:100%"/></label><br>
+      <label>Fecha y hora: <input required name="fecha" type="datetime-local" style="width:100%"/></label><br>
+      <label>Lugar: <input name="lugar" style="width:100%"/></label><br>
+      <label>Equipo local: <input required name="equipoLocal" value="Local" style="width:100%"/></label><br>
+      <label>Equipo visitante: <input required name="equipoVisita" value="Visita" style="width:100%"/></label><br>
+      <div style="margin-top:1.3em;"><b>Plantel Local:</b> <button type="button" onclick="editarPlantel('local')">Editar</button></div>
+      <div>${renderPlantelForm(plantelLocal)}</div>
+      <div style="margin-top:1.3em;"><b>Plantel Visitante:</b> <button type="button" onclick="editarPlantel('visita')">Editar</button></div>
+      <div>${renderPlantelForm(plantelVisita)}</div>
+      <br>
+      <button type="submit" style="padding:0.7em 2em;font-size:1.1em;">Comenzar Partido</button>
+    </form>
+  `;
+  document.getElementById('formPartido').onsubmit = (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    partido.nombre = fd.get('nombre');
+    partido.fecha = fd.get('fecha');
+    partido.lugar = fd.get('lugar');
+    partido.equipoLocal = fd.get('equipoLocal');
+    partido.equipoVisita = fd.get('equipoVisita');
+    enPista = [...plantelLocal];
+    render();
+  };
+}
+window.editarDatosPartido = function() {
+  partido.nombre = "";
+  render();
+};
+function renderPlantelForm(plantel) {
+  return `<ol>${plantel.map(j=>`<li>${j.dorsal} - ${j.nombre} (${j.rol})</li>`).join('')}</ol>`;
+}
+window.editarPlantel = function(tipo) {
+  let plantel = tipo==='local'?plantelLocal:plantelVisita;
+  let nombres = prompt("Ingresa los jugadores como: dorsal,nombre,rol por línea\nEj:\n1,Juan,C\n2,Luis,Z", plantel.map(j=>`${j.dorsal},${j.nombre},${j.rol}`).join('\n'));
+  if (nombres!==null) {
+    let nuevo = nombres.split('\n').map(line=>{
+      let [dorsal,nombre,rol] = line.split(',');
+      return {dorsal:dorsal.trim(),nombre:nombre.trim(),rol:rol.trim()};
+    }).filter(j=>j.nombre);
+    if (tipo==='local') plantelLocal = nuevo;
+    else plantelVisita = nuevo;
+  }
+  renderDatosPartido();
+};
+
+// =============== PISTA DE VOLEY SVG ================
+function renderPistaVoley(origen, destino) {
+  // Zonas propias (abajo), zonas rivales (arriba)
+  const zonas = [
+    {x:110, y:210, n:5}, {x:290, y:210, n:6}, {x:470, y:210, n:1},
+    {x:110, y:125, n:4}, {x:290, y:125, n:3}, {x:470, y:125, n:2},
+    // Zonas rivales
+    {x:110, y:40, n:'5r'}, {x:290, y:40, n:'6r'}, {x:470, y:40, n:'1r'},
+    {x:110, y:125, n:'4r'}, {x:290, y:125, n:'3r'}, {x:470, y:125, n:'2r'},
+  ];
+  return `
+    <svg width="600" height="300" style="display:block;margin:auto;" viewBox="0 0 600 300">
+      <rect x="50" y="30" width="500" height="240" rx="18" fill="#fff" stroke="#1976d2" stroke-width="6"/>
+      <line x1="50" y1="150" x2="550" y2="150" stroke="#ffd600" stroke-width="4"/>
+      <line x1="216" y1="30" x2="216" y2="270" stroke="#355c9b" stroke-width="2"/>
+      <line x1="384" y1="30" x2="384" y2="270" stroke="#355c9b" stroke-width="2"/>
+      <line x1="50" y1="90" x2="550" y2="90" stroke="#355c9b" stroke-width="2"/>
+      <line x1="50" y1="210" x2="550" y2="210" stroke="#355c9b" stroke-width="2"/>
+      ${zonas.map(z=>`
+        <circle cx="${z.x}" cy="${z.y}" r="26" fill="${
+          (origen==z.n)?'#ffe066':
+          (destino==z.n)?'#43ea53':
+          (typeof z.n==='string' && destino==z.n.replace('r',''))?'#43ea53':'#fafdff'
+        }" stroke="#1976d2" stroke-width="2"
+        onclick="clickZona('${z.n}')"
+        style="cursor:pointer;"
+        />
+        <text x="${z.x}" y="${z.y+6}" text-anchor="middle" font-size="25" font-weight="bold" fill="#1976d2">${typeof z.n==='string'?z.n.replace('r',''):z.n}</text>
+      `).join('')}
+      <text x="300" y="20" text-anchor="middle" font-size="18" fill="#1976d2">${partido.equipoVisita}</text>
+      <text x="300" y="295" text-anchor="middle" font-size="18" fill="#1976d2">${partido.equipoLocal}</text>
+      <text x="300" y="150" text-anchor="middle" font-size="14" fill="#ffd600" font-weight="bold">RED</text>
+    </svg>
+    <div style="text-align:center;">
+      Zona Propia: <b>${origen||"-"}</b> | Zona Rival: <b>${destino||"-"}</b>
+      ${origen && destino && accionSel!==null && jugadorSel!==null ? `<button style="margin-left:2em;font-size:1.1em;" onclick="popupResultado()">Registrar acción</button>`:""}
+    </div>
+  `;
+}
+window.clickZona = function(n) {
+  if (typeof n === "string" && n.endsWith("r")) {
+    zonaDestino = n;
+  } else {
+    zonaOrigen = n;
+  }
   render();
 };
 
-window.borrarAccion = function(idx) {
-  registro.splice(idx,1);
-  render();
-};
-
-function showPopup(x,y) {
+// ============ POPUP RESULTADO =============
+window.popupResultado = function() {
   let popup = document.getElementById('popup');
   popup.style.display = "flex";
   popup.innerHTML = `
     <div class="popup-box" id="popupbox">
-      <label>¿Quién realizó la acción?</label>
-      <div class="jug-list">
-        ${enPista.map((j,i)=>`
-          <button class="jug-btn" id="jug${i}">${j.dorsal} ${j.rol}</button>
-        `).join('')}
-      </div>
-      <label>¿A qué rival?</label>
-      <div class="jug-list">
-        ${enPistaRival.map((j,i)=>`
-          <button class="jug-btn" id="rival${i}">${j.dorsal} ${j.rol}</button>
-        `).join('')}
-      </div>
-      <div class="popup-footer">
+      <b>Resultado de la acción</b>
+      <div style="margin-top:1em;">
         <button class="punto" id="puntoBtn">Punto</button>
         <button class="error" id="errorBtn">Error</button>
         <button class="neutral" id="neutralBtn">/</button>
@@ -130,30 +206,18 @@ function showPopup(x,y) {
       </div>
     </div>
   `;
-  let jugadorIdx = null;
-  let rivalIdx = null;
-  enPista.forEach((j,i)=>{
-    document.getElementById(`jug${i}`).onclick = function(){
-      jugadorIdx = i;
-      enPista.forEach((_,ii)=>document.getElementById(`jug${ii}`).classList.toggle("selected",ii===i));
-    }
-  });
-  enPistaRival.forEach((j,i)=>{
-    document.getElementById(`rival${i}`).onclick = function(){
-      rivalIdx = i;
-      enPistaRival.forEach((_,ii)=>document.getElementById(`rival${ii}`).classList.toggle("selected",ii===i));
-    }
-  });
   function guardar(tipo) {
-    if(jugadorIdx===null || rivalIdx===null) return;
-    let jugador = enPista[jugadorIdx];
-    let rival = enPistaRival[rivalIdx];
-    registro.push({set: 1, accion:accionSel, jugador, rival, resultado:tipo, x, y});
+    registro.push({
+      set: 1,
+      accion: accionSel,
+      jugador: enPista[jugadorSel],
+      zonaOrigen,
+      zonaDestino,
+      resultado: tipo
+    });
     if(tipo==="Punto" || tipo==="Doble positiva") marcador.local++;
     if(tipo==="Error" || tipo==="Doble negativa") marcador.rival++;
-    if(accionSel==="Saque" && (tipo==="Punto" || tipo==="Doble positiva")) {
-      enPista.unshift(enPista.pop());
-    }
+    zonaOrigen = null; zonaDestino = null; accionSel = null;
     render();
     cerrarPopup();
   }
@@ -162,11 +226,21 @@ function showPopup(x,y) {
   document.getElementById("neutralBtn").onclick = ()=>guardar("Neutral");
   document.getElementById("doblePosBtn").onclick = ()=>guardar("Doble positiva");
   document.getElementById("dobleNegBtn").onclick = ()=>guardar("Doble negativa");
-}
+};
 window.cerrarPopup = function() {
   document.getElementById('popup').style.display = "none";
 };
 
+window.setAccion = function(a) {
+  accionSel = a;
+  render();
+};
+window.borrarAccion = function(idx) {
+  registro.splice(idx,1);
+  render();
+};
+
+// =============== ESTADÍSTICAS ================
 function renderStats() {
   const fund = ["Saque","Recepción","Ataque","Bloqueo","Defensa","Contraataque","Error"];
   let stats = {};
@@ -239,45 +313,24 @@ function renderStats() {
   `;
 }
 
+// ============ EXPORTACIÓN EXCEL Y PDF ============
 window.exportarExcel = function() {
   let sheetAcciones = [
-    ["#", "Set", "Acción", "Realizador", "Rival", "Resultado", "X", "Y"]
+    ["#", "Set", "Acción", "Jugador", "Origen", "Destino", "Resultado"]
   ];
   registro.forEach((r,i)=>{
     sheetAcciones.push([
       i+1, r.set||1, r.accion,
-      r.jugador ? `${r.jugador.dorsal} ${r.jugador.rol}` : "",
-      r.rival ? `${r.rival.dorsal} ${r.rival.rol}` : "",
-      r.resultado, Math.round(r.x), Math.round(r.y)
+      r.jugador ? `${r.jugador.dorsal} ${r.jugador.nombre}` : "",
+      r.zonaOrigen, r.zonaDestino, r.resultado
     ]);
   });
   let wb = XLSX.utils.book_new();
   wb.SheetNames.push("Acciones");
   wb.Sheets["Acciones"] = XLSX.utils.aoa_to_sheet(sheetAcciones);
-  const fund = ["Saque","Recepción","Ataque","Bloqueo","Defensa","Contraataque","Error"];
-  let statsSheet = [["Fundamento","++","+","-","--","/","Total","Eficiencia"]];
-  let stats = {};
-  fund.forEach(f=>stats[f]={punto:0,error:0,neutral:0,dp:0,dn:0,total:0});
-  registro.forEach(r=>{
-    if(r.jugador && fund.includes(r.accion)) {
-      stats[r.accion].total++;
-      if(r.resultado==="Punto") stats[r.accion].punto++;
-      else if(r.resultado==="Error") stats[r.accion].error++;
-      else if(r.resultado==="Doble positiva") stats[r.accion].dp++;
-      else if(r.resultado==="Doble negativa") stats[r.accion].dn++;
-      else stats[r.accion].neutral++;
-    }
-  });
-  fund.forEach(f=>{
-    let efi = stats[f].total?(((stats[f].dp+stats[f].punto-stats[f].error-stats[f].dn)/stats[f].total)*100).toFixed(1):"0";
-    statsSheet.push([f,stats[f].dp,stats[f].punto,stats[f].error,stats[f].dn,stats[f].neutral,stats[f].total,efi+"%"]);
-  });
-  wb.SheetNames.push("StatsFund");
-  wb.Sheets["StatsFund"] = XLSX.utils.aoa_to_sheet(statsSheet);
   XLSX.writeFile(wb, "clickvoley.xlsx");
 };
 
-// === Exportación PDF (acciones + stats) ===
 window.exportarPDF = function() {
   const { jsPDF } = window.jspdf;
   let doc = new jsPDF('l', 'pt', 'a4');
@@ -285,18 +338,22 @@ window.exportarPDF = function() {
   doc.setFontSize(18);
   doc.text(title, 40, 40);
 
+  // Datos partido
+  doc.setFontSize(12);
+  doc.text(`Partido: ${partido.nombre || ""}`, 40, 60);
+  doc.text(`Fecha: ${partido.fecha || ""} | Lugar: ${partido.lugar || ""}`, 40, 75);
+  doc.text(`Equipos: ${partido.equipoLocal} vs ${partido.equipoVisita}`, 40, 90);
+
   // Tabla de Acciones
   let accionesData = registro.map((r,i)=>[
     i+1, r.set||1, r.accion,
-    r.jugador ? `${r.jugador.dorsal} ${r.jugador.rol}` : "",
-    r.rival ? `${r.rival.dorsal} ${r.rival.rol}` : "",
-    r.resultado, Math.round(r.x), Math.round(r.y)
+    r.jugador ? `${r.jugador.dorsal} ${r.jugador.nombre}` : "",
+    r.zonaOrigen, r.zonaDestino, r.resultado
   ]);
   doc.setFontSize(14);
-  doc.text("Tabla de Acciones", 40, 75);
   doc.autoTable({
-    startY: 85,
-    head: [["#", "Set", "Acción", "Realizador", "Rival", "Resultado", "X", "Y"]],
+    startY: 110,
+    head: [["#", "Set", "Acción", "Jugador", "Origen", "Destino", "Resultado"]],
     body: accionesData,
     margin: { left:40, right:40 },
     styles: { fontSize: 10, cellPadding: 3 },
@@ -321,7 +378,7 @@ window.exportarPDF = function() {
     let efi = stats[f].total?(((stats[f].dp+stats[f].punto-stats[f].error-stats[f].dn)/stats[f].total)*100).toFixed(1):"0";
     return [f, stats[f].dp, stats[f].punto, stats[f].error, stats[f].dn, stats[f].neutral, stats[f].total, efi+"%"];
   });
-  let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 30 : 85 + (accionesData.length+1)*20;
+  let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 30 : 110 + (accionesData.length+1)*20;
   doc.text("Estadísticas por Fundamento", 40, finalY);
   doc.autoTable({
     startY: finalY+10,
