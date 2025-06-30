@@ -1,62 +1,71 @@
-body { background: #23263a; color: #ffda47; font-family: 'Segoe UI', Arial, sans-serif; margin:0;}
-#app { max-width:1350px; margin:0 auto; padding-bottom:40px;}
-.titulo { text-align:center; color:#ffda47; font-size:2.1em; margin:1.2em 0 0.7em 0; font-weight:900; }
-
-.btn-edit {
-  background: #ffd600;
-  color: #23263a;
+body { background: #0a0c11; color: #23263a; font-family: 'Segoe UI', Arial, sans-serif; margin:0;}
+#app { max-width:1100px; margin:0 auto; padding-bottom:40px;}
+.titulo { text-align:center; color:#00baff; font-size:2em; margin:1em 0 0.5em 0; font-weight:900; }
+.form-block {background:#fff; padding:1.5em 2.5em; border-radius:16px; max-width:610px; margin:2em auto 0 auto; box-shadow:0 6px 40px #00baff33;}
+.form-block label { font-weight:700; color: #0a0c11; margin-top:0.7em; display:block;}
+.form-block input, .form-block select, .form-block textarea {
+  font-size:1.08em; padding:0.3em 0.8em; border-radius:7px; border:1.5px solid #d2e9f7; margin-bottom:0.8em; width:100%;
+}
+.form-block textarea {height: 68px;}
+.form-block h3 {color:#00baff;margin-bottom:0.6em;}
+.equipo-section {margin-bottom:2em;}
+.btn-main, .btn-sec {
+  background: #00baff;
+  color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 0.3em 1.2em;
-  font-size: 1em;
+  padding: 0.63em 2.1em;
+  font-size: 1.13em;
   cursor: pointer;
-  margin-bottom: 1em;
   font-weight:600;
-  margin-left: 1em;
+  margin: 0 0.8em 1.2em 0;
+  transition:.13s;
 }
-.cancha-wrap { display: flex; flex-direction: column; align-items: center; margin:2em 0;}
-.cancha-svg { width: 900px; height: 480px; display: block; background: #0e1120; border-radius: 24px; box-shadow:0 8px 40px #0008;
-  border: 7px solid #ffda47; margin-bottom: 1.5em; position: relative;}
+.btn-sec { background: #222a35; color: #00baff; border: 1.5px solid #00baff;}
+.btn-main:active, .btn-sec:active { background: #08d5ff; color:#000;}
+/* ACCIONES */
+.panel-acciones {
+  display: flex; flex-direction: row; justify-content: center;
+  align-items: center; gap: 18px; margin: 0.5em 0 1.2em 0; flex-wrap:wrap;
+}
+.panel-acciones select, .panel-acciones button {
+  font-size:1em; padding:0.5em 1.2em; border-radius:8px; border:none;
+  background:#e3f6fd; color:#00baff; margin-right:0.7em; font-weight:600;
+}
+.panel-acciones button.selected, .panel-acciones select:focus { background:#00baff; color:#fff;}
+/* CANCHA */
+.cancha-wrap { display: flex; flex-direction: column; align-items: center; margin:1.2em 0;}
+.cancha-svg { width: 650px; height: 360px; display: block; background: #e3f6fd; border-radius: 20px; box-shadow:0 6px 35px #0006;
+  border: 5px solid #0a0c11; margin-bottom: 1.2em; position: relative;}
 .jugador-campo {
-  position: absolute; width: 64px; height: 64px; border-radius: 50%; border: 4px solid #fff;
-  font-size: 1.1em; font-weight: 700; color: #fff; background: linear-gradient(145deg, #0ea5e9 60%, #23263a 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: pointer; user-select: none; z-index: 12; transition: box-shadow .13s, border .13s, background .13s; outline:none;
-  box-shadow: 0 1px 10px #1e3a5f70;
+  position: absolute; width:50px; height:50px; border-radius:50%; border:3px solid #fff;
+  font-size:0.98em; font-weight:700; color:#222a35; background: linear-gradient(140deg, #00baff 85%, #fff 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  user-select: none; z-index: 12; outline:none; box-shadow:0 1px 8px #00baff55;
 }
-.jugador-campo.selected { box-shadow: 0 0 0 8px #ffd600cc, 0 2px 12px #355c9b50; border-color:#ffd600; background:linear-gradient(140deg,#fffae3 80%,#ffd600 100%); color:#294a77; z-index: 20;}
-.jugador-campo.rival { background: linear-gradient(145deg, #e20613 65%, #23263a 100%); color:#fff; border-color: #ffd600;}
-.jugador-campo.rival.selected { background:linear-gradient(140deg,#ffd6d6 80%,#e20613 100%); color:#23263a; border-color:#ffd600;}
+.jugador-campo.rival { background:linear-gradient(140deg,#222a35 90%,#fff 100%); color:#fff; border-color:#00baff;}
 .jugador-campo.sacador::after {
-  content: "🏐"; position: absolute; right:-16px; top:7px; font-size:1.15em;
+  content:"🏐"; position:absolute; right:-13px; top:6px; font-size:1em;
 }
+.suplentes-box {
+  text-align:center; background:#fff; color:#222a35; border-radius:12px; margin:0.7em 0 1.5em 0; padding:0.6em 1em; min-width:180px;
+  box-shadow:0 1px 8px #00baff18; font-size:0.96em;
+}
+.suplentes-box h4 {margin-bottom:0.3em; color:#00baff;}
+.suplentes-list {display:flex;flex-wrap:wrap;gap:7px; justify-content:center;}
+.suplentes-badge {display:inline-block;background:#00baff;color:#fff;padding:0.21em 0.6em;border-radius:6px;}
 .puntos-bar {
-  text-align:center; font-size:1.5em; font-weight:bold; margin:1.5em 0 0.5em 0;
+  text-align:center; font-size:1.18em; font-weight:bold; margin:0.5em 0 0.5em 0; color:#0a0c11;
 }
-.panel { display:flex; gap:20px; justify-content:center; margin:1.7em 0 2em 0; flex-wrap:wrap;}
-.panel button {
-  font-size:1.1em; padding:0.7em 1.5em; border-radius:8px; border:none; background:#23263a; color:#ffda47; margin-right:1em;
-  font-weight:600; transition:background .15s,color .15s;
+.registro-acciones, .stats-box {
+  background:#fff; color:#222a35; border-radius:11px; box-shadow:0 1px 8px #00baff18;
+  padding:0.9em 1.1em 1.3em 1.1em; margin:1.3em auto 0 auto; font-size:0.98em;
 }
-.panel button.selected, .panel button:active { background:#ffda47; color:#23263a;}
-.subzona { font-size:0.95em; font-weight:600; fill:#294a77; pointer-events: none;}
-.zona-btn, .subzona-btn {
-  cursor:pointer; fill:#ffd600; fill-opacity:0.0; transition: fill-opacity .16s;
-  stroke:#0ea5e9; stroke-width:2.5;
+.registro-acciones table, .stats-box table {width:100%; border-collapse:collapse;}
+.registro-acciones th, .registro-acciones td, .stats-box th, .stats-box td {
+  border-bottom:1.2px solid #b8e9ff;
+  padding:0.25em 0.4em; text-align:center;
 }
-.zona-btn.selected, .subzona-btn.selected { fill:#ffda47; fill-opacity:0.45; stroke:#0ea5e9; }
-.zona-label { font-size:1.35em; font-weight:900; fill:#1976d2; pointer-events:none;}
-.registro-acciones {
-  max-width:100%; margin:2.2em auto 0 auto; background:#23263a; border-radius:13px; box-shadow:0 1px 12px #355c9b22; padding:1.2em 1.6em 1.6em 1.6em; font-size:1.07em; color:#ffda47;
-}
-.registro-acciones table {width:100%; border-collapse:collapse; font-size:1.06em;}
-.registro-acciones th, .registro-acciones td {border-bottom:1.5px solid #383c4e; padding:0.4em 0.5em; text-align:center;}
-.registro-acciones th { background:#22263a; color: #ffda47;}
-.registro-acciones button {background:#e57373; color:#fff; border:none; border-radius:5px; padding:0.2em 0.5em; cursor:pointer;}
-#popup {position:fixed;left:0;top:0;width:100vw;height:100vh;background:#0009;z-index:200;display:flex;align-items:center;justify-content:center;}
-.popup-box {
-  background:#23263a;border-radius:13px;padding:2em 2.5em;box-shadow:0 6px 44px #355c9b55;display:flex;flex-direction:column;align-items:center;
-  min-width: 320px; color: #ffda47;
-}
-.popup-box label { font-weight:bold; margin-top:1em; }
-.popup-box input { font-size:1.05em; padding:0.3em 0.6em; margin-bottom:0.6em;}
+.registro-acciones th, .stats-box th { background:#e3f6fd; color: #00baff;}
+.registro-acciones button {background:#e57373; color:#fff; border:none; border-radius:5px; padding:0.15em 0.5em; cursor:pointer;}
+.stats-title {font-size:1.07em;font-weight:700;color:#00baff;margin-bottom:0.3em;}
