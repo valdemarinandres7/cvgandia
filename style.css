@@ -1,0 +1,97 @@
+body { background: #fafdff; font-family: 'Segoe UI', Arial, sans-serif; margin:0;}
+#app { max-width:1300px; margin:0 auto; padding-bottom:40px;}
+.titulo { text-align:center; color:#1e3a5f; font-size:2em; margin:1.2em 0 0.7em 0; font-weight:900; }
+.pista-lateral {
+  position: relative;
+  width: 950px;
+  height: 285px;
+  margin: 2em auto 1.2em auto;
+  background: #1e3a5f;
+  border-radius: 22px;
+  box-shadow: 0 8px 38px #1e3a5f25;
+  border: 5px solid #1976d2;
+  overflow: hidden;
+  cursor: crosshair;
+}
+.pista-svg {
+  width: 100%; height: 100%; display: block; pointer-events:none;
+}
+.jugador-campo {
+  position: absolute; width: 54px; height: 54px; border-radius: 50%; border: 3.5px solid #fff;
+  font-size: 1.1em; font-weight: 700; color: #fff;
+  background: linear-gradient(140deg, #4ea8de 75%, #1976d2 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; user-select: none; letter-spacing: 1.5px; z-index: 12;
+  transition: box-shadow .13s, border .13s, background .13s;
+  touch-action: none; outline:none;
+}
+.jugador-campo.selected { box-shadow: 0 0 0 7px #ffd600cc, 0 2px 12px #355c9b50; border-color:#ffd600; background:linear-gradient(140deg,#fffae3 80%,#ffd600 100%); color:#294a77; z-index: 20;}
+.jugador-campo.rival { background: linear-gradient(145deg, #f87171 65%, #b91c1c 100%); color:#fff; }
+.jugador-campo.rival.selected { background:linear-gradient(140deg,#fff1f1 80%,#f87171 100%); color:#b91c1c; border-color:#ffd600;}
+.acciones-panel { margin: 1.4em 0 1.2em 0; display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.acciones-panel button {
+  background: #355c9b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.9em 2em;
+  font-size: 1.14em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .13s;
+  outline:none;
+  box-shadow:0 2px 10px #355c9b22;
+}
+.acciones-panel button.selected {
+  background: #ffd600;
+  color: #294a77;
+  font-weight: bold;
+}
+#popup {
+  position:fixed;left:0;top:0;width:100vw;height:100vh;background:#0009;z-index:200;display:flex;align-items:center;justify-content:center;
+}
+.popup-box {
+  background:#fff;border-radius:13px;padding:2em 2.5em;box-shadow:0 6px 44px #355c9b55;display:flex;flex-direction:column;align-items:center;
+  min-width: 320px;
+}
+.popup-box label { font-weight:bold; margin-top:1em; }
+.popup-box .jug-list {display:flex;gap:12px;margin:1em 0;flex-wrap: wrap;}
+.popup-box .jug-btn {
+  padding:0.5em 1.1em;border-radius:7px;border:2px solid #dbeafe;background:#fafdff;
+  cursor:pointer;font-size:1.09em;margin-bottom:0.2em;
+}
+.popup-box .jug-btn.selected {background:#ffd600;color:#294a77;border-color:#ffd600;}
+.popup-box button.punto { background:#43ea53; color:#254b19; }
+.popup-box button.error { background:#e57373; color:#fff; }
+.popup-box button.neutral { background:#ffd600; color:#294a77; }
+.popup-box .popup-footer {margin-top:1.6em;}
+.stats-panel {margin:2em auto 2em auto;max-width:950px;display:flex;gap:24px;flex-wrap:wrap;justify-content:center;}
+.stats-box {background:#fff;border-radius:12px;box-shadow:0 2px 16px #355c9b11;padding:1.3em 2em;min-width:280px;}
+.stats-box table {width:100%;font-size:1.07em;}
+.stats-box th,.stats-box td{padding:0.3em 0.6em;text-align:center;}
+.stats-box th{color:#1976d2;font-size:1.09em;}
+.stats-title{font-size:1.15em;font-weight:700;color:#1e3a5f;margin-bottom:0.4em;}
+.registro-acciones {
+  max-width:100%; margin:2.2em auto 0 auto; background:#fff;
+  border-radius:13px; box-shadow:0 1px 12px #355c9b22;
+  padding:1.2em 1.6em 1.6em 1.6em; font-size:1.07em;
+}
+.registro-acciones table {
+  width:100%; border-collapse:collapse; font-size:1.06em;
+}
+.registro-acciones th, .registro-acciones td {
+  border-bottom:1.5px solid #e3eafc;
+  padding:0.4em 0.5em; text-align:center;
+}
+.registro-acciones th { background:#e3eafc; }
+.registro-acciones button {
+  background:#e57373; color:#fff; border:none; border-radius:5px; padding:0.2em 0.5em; cursor:pointer;
+}
+.marcador {text-align:center;margin:1em 0 2em 0;font-size:1.25em;font-weight:bold;}
+.marcador .local {color:#1976d2;}
+.marcador .rival {color:#b91c1c;}
+.registro-acciones .export-btn {
+  margin-top:1.5em;background:#ffd600;color:#1e3a5f;font-weight:700;
+  font-size:1.13em;border-radius:10px;padding:0.6em 2.5em;
+  cursor:pointer;border:none; margin-right:1em;
+}
