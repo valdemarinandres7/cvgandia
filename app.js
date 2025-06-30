@@ -1,4 +1,4 @@
-// === Datos del partido ===
+// Configuración inicial
 let partido = {
   nombre: "",
   fecha: "",
@@ -7,7 +7,6 @@ let partido = {
   equipoVisita: "Visita"
 };
 
-// === Planteles ===
 let plantelLocal = [
   { nombre: "Juan", dorsal: 1, rol: "C" },
   { nombre: "Pedro", dorsal: 2, rol: "R" },
@@ -16,33 +15,23 @@ let plantelLocal = [
   { nombre: "Mateo", dorsal: 5, rol: "R" },
   { nombre: "Fede", dorsal: 7, rol: "L" }
 ];
-let plantelVisita = [
-  { nombre: "Ale", dorsal: 11, rol: "C" },
-  { nombre: "Maxi", dorsal: 12, rol: "R" },
-  { nombre: "Leo", dorsal: 13, rol: "Z" },
-  { nombre: "Santi", dorsal: 14, rol: "O" },
-  { nombre: "Tobias", dorsal: 15, rol: "R" },
-  { nombre: "Bruno", dorsal: 17, rol: "L" }
-];
 
-// === En cancha ===
-let enPista = [...plantelLocal];
+let enPista = [plantelLocal[0],plantelLocal[1],plantelLocal[2],plantelLocal[3],plantelLocal[4],plantelLocal[5]]; // posiciones 1-6
 let marcador = { local: 0, rival: 0 };
 let registro = [];
 
 let accionSel = null;
 let jugadorSel = null;
-let zonaOrigen = null;
 let zonaDestino = null;
 
+// --- Render principal ---
 function render() {
   if (!partido.nombre || !partido.fecha) {
     renderDatosPartido();
     return;
   }
-  // Panel principal
   document.getElementById('app').innerHTML = `
-    <div class="titulo">${partido.nombre || "ClickVoley"}</div>
+    <div class="titulo">${partido.nombre}</div>
     <div style="text-align:center; margin-bottom: 0.6em; font-size:1.1em;">
       <b>${partido.equipoLocal}</b> vs <b>${partido.equipoVisita}</b> | Fecha: ${partido.fecha} | Lugar: ${partido.lugar}
       <button style="margin-left:2em" onclick="editarDatosPartido()">Editar datos</button>
@@ -53,9 +42,9 @@ function render() {
         `<button onclick="setAccion('${a}')" class="${accionSel===a?'selected':''}">${a}</button>`
       ).join('')}
     </div>
-    <div style="text-align:center;margin-bottom:1em;">1. Selecciona jugador | 2. Acción | 3. Zona de origen propia | 4. Zona destino rival</div>
-    <div class="pista-lateral" id="pista">
-      ${renderPistaVoley(zonaOrigen, zonaDestino)}
+    <div style="text-align:center;margin-bottom:1em;">1. Selecciona jugador | 2. Acción | 3. Haz click en zona destino rival</div>
+    <div class="pista-container">
+      ${renderPistaVoley()}
     </div>
     <div class="marcador">
       <span class="local">${partido.equipoLocal}</span> ${marcador.local} - ${marcador.rival} <span class="rival">${partido.equipoVisita}</span>
@@ -65,7 +54,7 @@ function render() {
       <b style="font-size:1.14em;">Registro de Acciones</b>
       <table>
         <tr>
-          <th>#</th><th>Set</th><th>Acción</th><th>Jugador</th><th>Origen</th><th>Destino</th><th>Resultado</th><th>Borrar</th>
+          <th>#</th><th>Set</th><th>Acción</th><th>Jugador</th><th>Zona destino</th><th>Resultado</th><th>Borrar</th>
         </tr>
         ${registro.map((r,i)=>`
           <tr>
@@ -73,7 +62,6 @@ function render() {
             <td>${r.set||1}</td>
             <td>${r.accion}</td>
             <td>${r.jugador? r.jugador.dorsal+" "+r.jugador.nombre : "-"}</td>
-            <td>${r.zonaOrigen||"-"}</td>
             <td>${r.zonaDestino||"-"}</td>
             <td>${r.resultado||"-"}</td>
             <td><button onclick="borrarAccion(${i})">✗</button></td>
@@ -84,13 +72,14 @@ function render() {
       <button class="export-btn" onclick="exportarPDF()">Exportar PDF</button>
     </div>
   `;
+  renderDarkToggle();
   document.getElementById('jugSelect').onchange = (e) => {
     jugadorSel = parseInt(e.target.value);
     render();
   };
 }
 
-// ==================== DATOS PARTIDO ====================
+// --- Formulario datos partido ---
 function renderDatosPartido() {
   document.getElementById('app').innerHTML = `
     <div class="titulo">Datos del Partido - ClickVoley</div>
@@ -102,8 +91,6 @@ function renderDatosPartido() {
       <label>Equipo visitante: <input required name="equipoVisita" value="Visita" style="width:100%"/></label><br>
       <div style="margin-top:1.3em;"><b>Plantel Local:</b> <button type="button" onclick="editarPlantel('local')">Editar</button></div>
       <div>${renderPlantelForm(plantelLocal)}</div>
-      <div style="margin-top:1.3em;"><b>Plantel Visitante:</b> <button type="button" onclick="editarPlantel('visita')">Editar</button></div>
-      <div>${renderPlantelForm(plantelVisita)}</div>
       <br>
       <button type="submit" style="padding:0.7em 2em;font-size:1.1em;">Comenzar Partido</button>
     </form>
@@ -116,7 +103,7 @@ function renderDatosPartido() {
     partido.lugar = fd.get('lugar');
     partido.equipoLocal = fd.get('equipoLocal');
     partido.equipoVisita = fd.get('equipoVisita');
-    enPista = [...plantelLocal];
+    enPista = plantelLocal.slice(0,6);
     render();
   };
 }
@@ -136,73 +123,98 @@ window.editarPlantel = function(tipo) {
       return {dorsal:dorsal.trim(),nombre:nombre.trim(),rol:rol.trim()};
     }).filter(j=>j.nombre);
     if (tipo==='local') plantelLocal = nuevo;
-    else plantelVisita = nuevo;
   }
   renderDatosPartido();
 };
 
-// =============== PISTA DE VOLEY SVG ================
-function renderPistaVoley(origen, destino) {
-  // Zonas propias (abajo), zonas rivales (arriba)
-  const zonas = [
-    {x:110, y:210, n:5}, {x:290, y:210, n:6}, {x:470, y:210, n:1},
-    {x:110, y:125, n:4}, {x:290, y:125, n:3}, {x:470, y:125, n:2},
-    // Zonas rivales
-    {x:110, y:40, n:'5r'}, {x:290, y:40, n:'6r'}, {x:470, y:40, n:'1r'},
-    {x:110, y:125, n:'4r'}, {x:290, y:125, n:'3r'}, {x:470, y:125, n:'2r'},
+// --- PISTA DE VOLEY SVG CON JUGADORES DISTRIBUIDOS ---
+function renderPistaVoley() {
+  // Posiciones oficiales (coordenadas para 6 vs 6)
+  const posLocal = [
+    {x:150, y:340}, // zona 1
+    {x:325, y:340}, // zona 6
+    {x:500, y:340}, // zona 5
+    {x:150, y:250}, // zona 2
+    {x:325, y:250}, // zona 3
+    {x:500, y:250}, // zona 4
   ];
-  return `
-    <svg width="600" height="300" style="display:block;margin:auto;" viewBox="0 0 600 300">
-      <rect x="50" y="30" width="500" height="240" rx="18" fill="#fff" stroke="#1976d2" stroke-width="6"/>
-      <line x1="50" y1="150" x2="550" y2="150" stroke="#ffd600" stroke-width="4"/>
-      <line x1="216" y1="30" x2="216" y2="270" stroke="#355c9b" stroke-width="2"/>
-      <line x1="384" y1="30" x2="384" y2="270" stroke="#355c9b" stroke-width="2"/>
-      <line x1="50" y1="90" x2="550" y2="90" stroke="#355c9b" stroke-width="2"/>
-      <line x1="50" y1="210" x2="550" y2="210" stroke="#355c9b" stroke-width="2"/>
-      ${zonas.map(z=>`
-        <circle cx="${z.x}" cy="${z.y}" r="26" fill="${
-          (origen==z.n)?'#ffe066':
-          (destino==z.n)?'#43ea53':
-          (typeof z.n==='string' && destino==z.n.replace('r',''))?'#43ea53':'#fafdff'
-        }" stroke="#1976d2" stroke-width="2"
-        onclick="clickZona('${z.n}')"
-        style="cursor:pointer;"
-        />
-        <text x="${z.x}" y="${z.y+6}" text-anchor="middle" font-size="25" font-weight="bold" fill="#1976d2">${typeof z.n==='string'?z.n.replace('r',''):z.n}</text>
+  const posRival = [
+    {x:150, y:70},
+    {x:325, y:70},
+    {x:500, y:70},
+    {x:150, y:160},
+    {x:325, y:160},
+    {x:500, y:160},
+  ];
+  // Zonas destino (rival)
+  const zonasRival = [
+    {label: '1', x:90, y:40, n:"1"}, {label:'2', x:270, y:40, n:"2"}, {label:'3', x:450, y:40, n:"3"},
+    {label: '4', x:90, y:130, n:"4"}, {label:'5', x:270, y:130, n:"5"}, {label:'6', x:450, y:130, n:"6"},
+  ];
+  let svg = `
+    <div style="position:relative;width:100%;height:420px;">
+    <svg class="pista-voley-svg" width="1000" height="420" viewBox="0 0 700 420">
+      <rect x="40" y="30" width="620" height="360" rx="22" fill="#fff" stroke="#ffda47" stroke-width="8"/>
+      <rect x="40" y="210" width="620" height="4" fill="#ffda47"/>
+      <line x1="246.6" y1="30" x2="246.6" y2="390" stroke="#23263a" stroke-width="3"/>
+      <line x1="453.3" y1="30" x2="453.3" y2="390" stroke="#23263a" stroke-width="3"/>
+      <text x="350" y="22" text-anchor="middle" font-size="16" fill="#ffda47" font-weight="bold">${partido.equipoVisita}</text>
+      <text x="350" y="410" text-anchor="middle" font-size="16" fill="#ffda47" font-weight="bold">${partido.equipoLocal}</text>
+      <text x="350" y="225" text-anchor="middle" font-size="16" fill="#ffda47" font-weight="bold">RED</text>
+      ${zonasRival.map(z=>`
+        <rect x="${z.x}" y="${z.y}" width="160" height="90" rx="12"
+          fill="${zonaDestino==z.n?'#ffe066':'#fafdff'}" stroke="#0ea5e9" stroke-width="3"
+          style="cursor:pointer"
+          onclick="clickZonaDestino('${z.n}')"/>
+        <text x="${z.x+80}" y="${z.y+55}" text-anchor="middle" font-size="35" font-weight="bold"
+        fill="#0ea5e9" style="pointer-events:none">${z.label}</text>
       `).join('')}
-      <text x="300" y="20" text-anchor="middle" font-size="18" fill="#1976d2">${partido.equipoVisita}</text>
-      <text x="300" y="295" text-anchor="middle" font-size="18" fill="#1976d2">${partido.equipoLocal}</text>
-      <text x="300" y="150" text-anchor="middle" font-size="14" fill="#ffd600" font-weight="bold">RED</text>
     </svg>
-    <div style="text-align:center;">
-      Zona Propia: <b>${origen||"-"}</b> | Zona Rival: <b>${destino||"-"}</b>
-      ${origen && destino && accionSel!==null && jugadorSel!==null ? `<button style="margin-left:2em;font-size:1.1em;" onclick="popupResultado()">Registrar acción</button>`:""}
+    ${
+      enPista.map((j,i)=>`
+      <div class="jugador-campo${jugadorSel===i?' selected':''}"
+        onclick="seleccionarJugador(${i})"
+        style="left:${posLocal[i].x-32}px;top:${posLocal[i].y-32}px;z-index:10;">
+        ${j.dorsal}<span style="font-size:0.97em;line-height:1">${j.rol}</span>
+      </div>
+      `).join('')
+    }
     </div>
   `;
+  // Si todo listo, muestra botón registrar
+  svg += `
+    <div style="text-align:center;">
+      Zona destino: <b>${zonaDestino||"-"}</b>
+      ${zonaDestino && accionSel!==null && jugadorSel!==null ? `<button style="margin-left:2em;font-size:1.1em;" onclick="popupResultado()">Registrar acción</button>`:""}
+    </div>
+  `;
+  return svg;
 }
-window.clickZona = function(n) {
-  if (typeof n === "string" && n.endsWith("r")) {
-    zonaDestino = n;
-  } else {
-    zonaOrigen = n;
-  }
+window.clickZonaDestino = function(n) {
+  zonaDestino = n;
+  render();
+};
+window.seleccionarJugador = function(idx) {
+  jugadorSel = idx;
   render();
 };
 
-// ============ POPUP RESULTADO =============
+// --- Popup resultado acción ---
 window.popupResultado = function() {
   let popup = document.getElementById('popup');
   popup.style.display = "flex";
   popup.innerHTML = `
     <div class="popup-box" id="popupbox">
       <b>Resultado de la acción</b>
-      <div style="margin-top:1em;">
+      <div style="margin-top:1em;display:flex;gap:10px;">
         <button class="punto" id="puntoBtn">Punto</button>
         <button class="error" id="errorBtn">Error</button>
         <button class="neutral" id="neutralBtn">/</button>
         <button class="punto" id="doblePosBtn" style="background:#1976d2;color:#fff;">Doble positiva</button>
         <button class="error" id="dobleNegBtn" style="background:#b91c1c;">Doble negativa</button>
-        <button style="margin-left:1em;background:#eee;color:#555;" onclick="cerrarPopup()">Cancelar</button>
+      </div>
+      <div class="popup-footer">
+        <button style="margin-top:1.2em;background:#eee;color:#555;" onclick="cerrarPopup()">Cancelar</button>
       </div>
     </div>
   `;
@@ -211,13 +223,12 @@ window.popupResultado = function() {
       set: 1,
       accion: accionSel,
       jugador: enPista[jugadorSel],
-      zonaOrigen,
       zonaDestino,
       resultado: tipo
     });
     if(tipo==="Punto" || tipo==="Doble positiva") marcador.local++;
     if(tipo==="Error" || tipo==="Doble negativa") marcador.rival++;
-    zonaOrigen = null; zonaDestino = null; accionSel = null;
+    zonaDestino = null; accionSel = null;
     render();
     cerrarPopup();
   }
@@ -240,7 +251,7 @@ window.borrarAccion = function(idx) {
   render();
 };
 
-// =============== ESTADÍSTICAS ================
+// --- Estadísticas (igual que antes) ---
 function renderStats() {
   const fund = ["Saque","Recepción","Ataque","Bloqueo","Defensa","Contraataque","Error"];
   let stats = {};
@@ -313,16 +324,16 @@ function renderStats() {
   `;
 }
 
-// ============ EXPORTACIÓN EXCEL Y PDF ============
+// --- Exportación Excel/PDF (igual que antes) ---
 window.exportarExcel = function() {
   let sheetAcciones = [
-    ["#", "Set", "Acción", "Jugador", "Origen", "Destino", "Resultado"]
+    ["#", "Set", "Acción", "Jugador", "Zona destino", "Resultado"]
   ];
   registro.forEach((r,i)=>{
     sheetAcciones.push([
       i+1, r.set||1, r.accion,
       r.jugador ? `${r.jugador.dorsal} ${r.jugador.nombre}` : "",
-      r.zonaOrigen, r.zonaDestino, r.resultado
+      r.zonaDestino, r.resultado
     ]);
   });
   let wb = XLSX.utils.book_new();
@@ -330,7 +341,6 @@ window.exportarExcel = function() {
   wb.Sheets["Acciones"] = XLSX.utils.aoa_to_sheet(sheetAcciones);
   XLSX.writeFile(wb, "clickvoley.xlsx");
 };
-
 window.exportarPDF = function() {
   const { jsPDF } = window.jspdf;
   let doc = new jsPDF('l', 'pt', 'a4');
@@ -348,12 +358,12 @@ window.exportarPDF = function() {
   let accionesData = registro.map((r,i)=>[
     i+1, r.set||1, r.accion,
     r.jugador ? `${r.jugador.dorsal} ${r.jugador.nombre}` : "",
-    r.zonaOrigen, r.zonaDestino, r.resultado
+    r.zonaDestino, r.resultado
   ]);
   doc.setFontSize(14);
   doc.autoTable({
     startY: 110,
-    head: [["#", "Set", "Acción", "Jugador", "Origen", "Destino", "Resultado"]],
+    head: [["#", "Set", "Acción", "Jugador", "Zona destino", "Resultado"]],
     body: accionesData,
     margin: { left:40, right:40 },
     styles: { fontSize: 10, cellPadding: 3 },
@@ -422,4 +432,25 @@ window.exportarPDF = function() {
   doc.save("clickvoley.pdf");
 };
 
+// --- Dark mode ---
+let dark = true;
+function renderDarkToggle() {
+  if (!document.getElementById('dark-toggle')) {
+    const btn = document.createElement('button');
+    btn.className = "dark-toggle-btn";
+    btn.id = "dark-toggle";
+    btn.innerText = dark ? "☀ Modo Claro" : "🌙 Modo Oscuro";
+    btn.onclick = ()=>{
+      dark = !dark;
+      document.body.classList.toggle('dark', dark);
+      btn.innerText = dark ? "☀ Modo Claro" : "🌙 Modo Oscuro";
+    };
+    document.body.appendChild(btn);
+  } else {
+    document.getElementById('dark-toggle').innerText = dark ? "☀ Modo Claro" : "🌙 Modo Oscuro";
+    document.body.classList.toggle('dark', dark);
+  }
+}
+
+// --- Inicializa ---
 render();
